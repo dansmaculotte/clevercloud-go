@@ -4,13 +4,16 @@ type Organization struct {
 	ID               string `json:"id"`
 	Name             string `json:"name"`
 	Description      string `json:"description"`
-	Avatar           string `json:"avatar"`
-	Company          string `json:"company"`
 	Address          string `json:"address"`
-	zipCode          string `json:"zipcode"`
 	City             string `json:"city"`
+	ZipCode          string `json:"zipcode"`
 	Country          string `json:"country"`
+	Company          string `json:"company"`
 	VAT              string `json:"VAT"`
-	vatState         string `json:"vatState"`
-	customerFullName string `json:"customerFullName"`
+	Avatar           string `json:"avatar"`
+	VATState         string `json:"vatState"`
+	CustomerFullName string `json:"customerFullName"`
+	CanPay           bool   `json:"canPay"`
+	CleverEnterprise bool   `json:"cleverEnterprise"`
+	EmergencyNumber  string `json:"emergencyNumber"`
 }
