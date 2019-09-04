@@ -50,10 +50,6 @@ func main() {
 		Realm: clevercloud.APIURL + "/oauth",
 	}
 
-	oauth()
-}
-
-func oauth() {
 	requestToken, requestSecret, err := login()
 	if err != nil {
 		log.Fatalf("Request Token Phase: %s", err.Error())
