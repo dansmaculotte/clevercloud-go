@@ -8,17 +8,16 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"time"
 
 	clevercloud "github.com/dansmaculotte/clevercloud-go"
-	"github.com/dghubble/oauth1"
+	"github.com/gomodule/oauth1/oauth"
 )
 
 var (
 	consumerKey    string
 	consumerSecret string
 )
-
-var config *oauth1.Config
 
 func readArgs() error {
 	flag.StringVar(&consumerKey, "consumer-key", "", "Clever Cloud OAuth consumer key")
@@ -38,63 +37,66 @@ func main() {
 		os.Exit(1)
 	}
 
-	config = &oauth1.Config{
-		ConsumerKey:    consumerKey,
-		ConsumerSecret: consumerSecret,
-		CallbackURL:    "http://localhost:8080/callback",
-		Endpoint: oauth1.Endpoint{
-			RequestTokenURL: clevercloud.APIURL + "/oauth/request_token",
-			AuthorizeURL:    clevercloud.APIURL + "/oauth/authorize",
-			AccessTokenURL:  clevercloud.APIURL + "/oauth/access_token",
+	client := &oauth.Client{
+		Credentials: oauth.Credentials{
+			Token:  consumerKey,
+			Secret: consumerSecret,
 		},
-		Realm: clevercloud.APIURL + "/oauth",
+		TemporaryCredentialRequestURI: clevercloud.APIURL + "/oauth/request_token",
+		ResourceOwnerAuthorizationURI: clevercloud.APIURL + "/oauth/authorize",
+		TokenRequestURI:               clevercloud.APIURL + "/oauth/access_token",
+		SignatureMethod:               oauth.HMACSHA1,
 	}
 
-	requestToken, requestSecret, err := login()
+	hc := &http.Client{Timeout: 2 * time.Second}
+
+	tmpCredentials, err := client.RequestTemporaryCredentials(hc, "http://localhost:8080/callback", nil)
 	if err != nil {
-		log.Fatalf("Request Token Phase: %s", err.Error())
+		log.Fatalln(err.Error())
 	}
 
-	accessToken, err := access(requestToken, requestSecret)
-	if err != nil {
-		log.Fatalf("Access Token Phase: %s", err.Error())
-	}
+	authURL := client.AuthorizationURL(tmpCredentials, nil)
 
-	fmt.Println("Consumer was granted an access token to act on behalf of a user.")
-	fmt.Printf("token: %s\nsecret: %s\n", accessToken.Token, accessToken.TokenSecret)
-}
+	fmt.Printf("Open this URL in your browser:\n%s\n", authURL)
 
-func login() (requestToken, requestSecret string, err error) {
-	requestToken, requestSecret, err = config.RequestToken()
-	if err != nil {
-		return "", "", err
-	}
-	authorizationURL, err := config.AuthorizationURL(requestToken)
-	if err != nil {
-		return "", "", err
-	}
-	fmt.Printf("Open this URL in your browser:\n%s\n", authorizationURL.String())
-	return requestToken, requestSecret, err
-}
-
-func access(requestToken, requestSecret string) (*oauth1.Token, error) {
 	var verifier string
-	var err error
+	var requestToken string
+	var userID string
 
 	m := http.NewServeMux()
 	s := http.Server{Addr: ":8080", Handler: m}
 
 	m.HandleFunc("/callback", func(w http.ResponseWriter, req *http.Request) {
-		requestToken, verifier, err = oauth1.ParseAuthorizationCallback(req)
-		s.Shutdown(context.Background())
+		err = req.ParseForm()
+
+		if err != nil {
+			w.WriteHeader(500)
+			fmt.Fprint(w, err.Error())
+		}
+
+		requestToken = req.Form.Get("oauth_token")
+		verifier = req.Form.Get("oauth_verifier")
+		userID = req.Form.Get("user")
+
+		if requestToken == "" || verifier == "" {
+			w.WriteHeader(500)
+			fmt.Fprint(w, "oauth1: Request missing oauth_token or oauth_verifier")
+		}
+
+		w.WriteHeader(200)
+		fmt.Fprint(w, "You can close this tab")
+		go s.Shutdown(context.Background())
 	})
-	if err := s.ListenAndServe(); err != nil {
+
+	if err := s.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 		log.Fatalf("Error listening, %v", err)
 	}
 
-	accessToken, accessSecret, err := config.AccessToken(requestToken, requestSecret, verifier)
+	credendials, _, err := client.RequestToken(hc, tmpCredentials, verifier)
 	if err != nil {
-		return nil, err
+		log.Fatalln(err.Error())
 	}
-	return oauth1.NewToken(accessToken, accessSecret), err
+
+	fmt.Printf("token: %s\nsecret: %s\n", credendials.Token, credendials.Secret)
+	fmt.Printf("user: %s\n", userID)
 }
