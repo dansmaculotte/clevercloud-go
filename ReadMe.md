@@ -56,12 +56,12 @@ addon, err := self.GetAddons(client, addon.ID)
 
 ```go
 organizations, err := clevercloud.GetOrganizations(client, "owner_id")
-organization, err := clevercloud.GetOrganization(client, organizations[1].ID)
+organization, err := clevercloud.GetOrganization(client, organizations[0].ID)
 ```
 
 #### [Addons](https://www.clever-cloud.com/doc/api/#!/addons)
 
 ```go
 addons, err := organization.GetAddons(client)
-addon, err := organization.GetAddon(client.ID)
+addon, err := organization.GetAddon(client, addon.ID)
 ```
