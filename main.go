@@ -8,5 +8,12 @@ import (
 
 func main() {
 	config := clevercloud.GetConfig()
-	fmt.Println(config)
+	client := clevercloud.NewClient(config, nil)
+
+	self, err := clevercloud.GetSelf(client)
+	if err != nil {
+		panic(err)
+	}
+
+	fmt.Println(self)
 }
