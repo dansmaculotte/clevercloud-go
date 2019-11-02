@@ -39,29 +39,25 @@ config = clevercloud.GetConfigFromEnv()
 client := clevercloud.NewClient(config, &http.Client{})
 ```
 
-### [Self](https://www.clever-cloud.com/doc/api/#!/self)
+## Resources
+
+### [Self](./clevercloud/self.go)
+
+- [API Reference](https://www.clever-cloud.com/doc/api/#!/self)
 
 ```go
 self, err := clevercloud.GetSelf(client)
+selfAddons, err := self.GetAddons(client)
+selfAddons, err := self.GetAddons(client, selfAddons[0].ID)
 ```
 
-#### [Addons](https://www.clever-cloud.com/doc/api/#!/addons)
+### [Organizations](./clevercloud/organization.go)
+
+- [API Reference](https://www.clever-cloud.com/doc/api/#!/organisations)
 
 ```go
-addons, err := self.GetAddons(client)
-addon, err := self.GetAddons(client, addons[0].ID)
-```
-
-### [Organizations](https://www.clever-cloud.com/doc/api/#!/organisations)
-
-```go
-organizations, err := clevercloud.GetOrganizations(client, "owner_id")
+organizations, err := clevercloud.GetOrganizations(client, self.ID)
 organization, err := clevercloud.GetOrganization(client, organizations[0].ID)
-```
-
-#### [Addons](https://www.clever-cloud.com/doc/api/#!/addons)
-
-```go
-addons, err := organization.GetAddons(client)
-addon, err := organization.GetAddon(client, addon[0].ID)
+organizationAddons, err := organization.GetAddons(client)
+organizationAddon, err := organization.GetAddon(client, organizationAddons[0].ID)
 ```
