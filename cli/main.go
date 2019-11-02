@@ -10,18 +10,20 @@ import (
 	"os"
 	"time"
 
-	clevercloud "github.com/dansmaculotte/clevercloud-go"
+	"github.com/dansmaculotte/clevercloud-go/clevercloud"
 	"github.com/gomodule/oauth1/oauth"
 )
 
 var (
 	consumerKey    string
 	consumerSecret string
+	serverAddr     string
 )
 
 func readArgs() error {
-	flag.StringVar(&consumerKey, "consumer-key", "", "Clever Cloud OAuth consumer key")
-	flag.StringVar(&consumerSecret, "consumer-secret", "", "Clever Cloud OAuth consumer secret")
+	flag.StringVar(&consumerKey, "consumer-key", clevercloud.OAuthConsumerKey, "Clever Cloud OAuth consumer key")
+	flag.StringVar(&consumerSecret, "consumer-secret", clevercloud.OAuthConsumerSecret, "Clever Cloud OAuth consumer secret")
+	flag.StringVar(&serverAddr, "server-addr", "localhost:8000", "Server address for OAuth callback")
 	flag.Parse()
 
 	if consumerKey == "" || consumerSecret == "" {
@@ -50,7 +52,7 @@ func main() {
 
 	hc := &http.Client{Timeout: 2 * time.Second}
 
-	tmpCredentials, err := client.RequestTemporaryCredentials(hc, "http://localhost:8080/callback", nil)
+	tmpCredentials, err := client.RequestTemporaryCredentials(hc, "http://"+serverAddr+"/callback", nil)
 	if err != nil {
 		log.Fatalln(err.Error())
 	}
@@ -64,7 +66,7 @@ func main() {
 	var userID string
 
 	m := http.NewServeMux()
-	s := http.Server{Addr: ":8080", Handler: m}
+	s := http.Server{Addr: serverAddr, Handler: m}
 
 	m.HandleFunc("/callback", func(w http.ResponseWriter, req *http.Request) {
 		err = req.ParseForm()
