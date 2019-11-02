@@ -7,7 +7,7 @@ import (
 )
 
 func main() {
-	config := clevercloud.GetConfig()
+	config := clevercloud.GetConfigFromUser()
 	client := clevercloud.NewClient(config, nil)
 
 	self, err := clevercloud.GetSelf(client)

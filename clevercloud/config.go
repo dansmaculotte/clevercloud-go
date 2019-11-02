@@ -14,8 +14,8 @@ type Config struct {
 	Secret string `json:"secret"`
 }
 
-// GetConfig Read clever-cloud user config file
-func GetConfig() *Config {
+// GetConfigFromUser Read clever-cloud user config file
+func GetConfigFromUser() *Config {
 	usr, err := user.Current()
 	if err != nil {
 		panic(err)
