@@ -1,8 +1,15 @@
 package clevercloud
 
-var BaseUrl = "/self"
+import (
+	"fmt"
+	"net/url"
 
-// Self https://www.clever-cloud.com/doc/api/#!/self
+	"github.com/gorilla/schema"
+)
+
+var selfBaseURL = "/self"
+
+// Self Resource
 type Self struct {
 	ID             string   `json:"id"`
 	Email          string   `json:"email"`
@@ -26,9 +33,57 @@ type Self struct {
 func GetSelf(client *Client) (*Self, error) {
 	self := &Self{}
 
-	if err := client.Get(BaseUrl, nil, self); err != nil {
+	if err := client.Get(selfBaseURL, nil, self); err != nil {
 		return nil, err
 	}
 
 	return self, nil
+}
+
+func (s *Self) GetAddons(client *Client) ([]*Addon, error) {
+	addons := []*Addon{}
+
+	uri := fmt.Sprintf("%s/%s/addons", selfBaseURL, s.ID)
+
+	if err := client.Get(uri, nil, &addons); err != nil {
+		return nil, err
+	}
+
+	return addons, nil
+}
+
+func (s *Self) GetAddon(client *Client, addonId string) (*Addon, error) {
+	addon := &Addon{}
+
+	uri := fmt.Sprintf("%s/%s/addons/%s", selfBaseURL, s.ID, addonId)
+
+	if err := client.Get(uri, nil, &addon); err != nil {
+		return nil, err
+	}
+
+	return addon, nil
+}
+
+type SelfUpdateRequest struct {
+	Address  string `schema:"address"`
+	City     string `schema:"city"`
+	Country  string `schema:"country"`
+	Email    string `schema:"email,required"`
+	Language string `schema:"language"`
+	Name     string `schema:"name"`
+	Password string `schema:"password,required"`
+	Phone    string `schema:"phone"`
+	Terms    bool   `schema:"terms,required"`
+	ZipCode  string `schema:"zipcode"`
+}
+
+func (s *Self) Update(client *Client, data *SelfUpdateRequest) error {
+	encoder := schema.NewEncoder()
+	form := url.Values{}
+
+	if err := encoder.Encode(data, form); err != nil {
+		return err
+	}
+
+	return client.Put(selfBaseURL, form, nil)
 }

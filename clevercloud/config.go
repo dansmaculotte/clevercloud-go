@@ -3,6 +3,7 @@ package clevercloud
 import (
 	"encoding/json"
 	"io/ioutil"
+	"os"
 	"os/user"
 )
 
@@ -32,4 +33,12 @@ func GetConfigFromUser() *Config {
 	}
 
 	return config
+}
+
+// GetConfigFromEnv Read environment for clever-cloud variables
+func GetConfigFromEnv() *Config {
+	return &Config{
+		Token:  os.Getenv("CLEVER_TOKEN"),
+		Secret: os.Getenv("CLEVER_SECRET"),
+	}
 }
