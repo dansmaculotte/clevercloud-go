@@ -1,5 +1,9 @@
 package clevercloud
 
+import (
+	"fmt"
+)
+
 type Addon struct {
 	ID           string    `json:"id"`
 	Name         string    `json:"name"`
@@ -41,4 +45,52 @@ type Feature struct {
 	Name  string `json:"name"`
 	Type  string `json:"type"`
 	Value string `json:"value"`
+}
+
+func (a *API) getAddons(client *Client, baseURL, ownerID string) ([]*Addon, error) {
+	addons := []*Addon{}
+
+	uri := fmt.Sprintf("%s/%s/addons", baseURL, ownerID)
+
+	if err := client.Get(uri, nil, &addons); err != nil {
+		return nil, err
+	}
+
+	return addons, nil
+}
+
+func (a *API) getAddon(client *Client, baseURL, ownerID, addonID string) (*Addon, error) {
+	addon := &Addon{}
+
+	uri := fmt.Sprintf("%s/%s/addons/%s", baseURL, ownerID, addonID)
+
+	if err := client.Get(uri, nil, &addon); err != nil {
+		return nil, err
+	}
+
+	return addon, nil
+}
+
+func (a *API) getAddonProviders(client *Client, baseURL, ownerID string) ([]*Addon, error) {
+	addons := []*Addon{}
+
+	uri := fmt.Sprintf("%s/%s/addonproviders", baseURL, ownerID)
+
+	if err := client.Get(uri, nil, &addons); err != nil {
+		return nil, err
+	}
+
+	return addons, nil
+}
+
+func (a *API) getAddonProvider(client *Client, baseURL, ownerID, addonID string) (*Addon, error) {
+	addon := &Addon{}
+
+	uri := fmt.Sprintf("%s/%s/addonproviders/%s", baseURL, ownerID, addonID)
+
+	if err := client.Get(uri, nil, &addon); err != nil {
+		return nil, err
+	}
+
+	return addon, nil
 }

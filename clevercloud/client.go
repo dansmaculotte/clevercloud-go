@@ -12,22 +12,22 @@ import (
 
 // Client Used to request API
 type Client struct {
-	Crendentials *oauth.Credentials
-	OAuthClient  *oauth.Client
-	HTTPClient   *http.Client
+	Credentials *oauth.Credentials
+	OAuthClient *oauth.Client
+	HTTPClient  *http.Client
 }
 
 // NewClient Returns a fresh new client instance
 func NewClient(config *Config, client *http.Client) *Client {
 	return &Client{
-		Crendentials: &oauth.Credentials{
+		Credentials: &oauth.Credentials{
 			Token:  config.Token,
 			Secret: config.Secret,
 		},
 		OAuthClient: &oauth.Client{
 			Credentials: oauth.Credentials{
-				Token:  OAuthConsumerKey,
-				Secret: OAuthConsumerSecret,
+				Token:  oAuthConsumerKey,
+				Secret: oAuthConsumerSecret,
 			},
 			TemporaryCredentialRequestURI: APIURL + "/oauth/request_token",
 			ResourceOwnerAuthorizationURI: APIURL + "/oauth/authorize",
@@ -40,7 +40,7 @@ func NewClient(config *Config, client *http.Client) *Client {
 
 // Get Request with GET method
 func (c *Client) Get(uri string, form url.Values, data interface{}) error {
-	res, err := c.OAuthClient.Get(c.HTTPClient, c.Crendentials, APIURL+uri, form)
+	res, err := c.OAuthClient.Get(c.HTTPClient, c.Credentials, APIURL+uri, form)
 	if err != nil {
 		return err
 	}
@@ -51,7 +51,7 @@ func (c *Client) Get(uri string, form url.Values, data interface{}) error {
 
 // Post Request with POST method
 func (c *Client) Post(uri string, form url.Values, data interface{}) error {
-	res, err := c.OAuthClient.Post(c.HTTPClient, c.Crendentials, APIURL+uri, form)
+	res, err := c.OAuthClient.Post(c.HTTPClient, c.Credentials, APIURL+uri, form)
 	if err != nil {
 		return err
 	}
@@ -62,7 +62,7 @@ func (c *Client) Post(uri string, form url.Values, data interface{}) error {
 
 // Put Request with PUT method
 func (c *Client) Put(uri string, form url.Values, data interface{}) error {
-	res, err := c.OAuthClient.Put(c.HTTPClient, c.Crendentials, APIURL+uri, form)
+	res, err := c.OAuthClient.Put(c.HTTPClient, c.Credentials, APIURL+uri, form)
 	if err != nil {
 		return err
 	}
@@ -73,7 +73,7 @@ func (c *Client) Put(uri string, form url.Values, data interface{}) error {
 
 // Delete Request with DELETE method
 func (c *Client) Delete(uri string, form url.Values, data interface{}) error {
-	res, err := c.OAuthClient.Delete(c.HTTPClient, c.Crendentials, APIURL+uri, form)
+	res, err := c.OAuthClient.Delete(c.HTTPClient, c.Credentials, APIURL+uri, form)
 	if err != nil {
 		return err
 	}

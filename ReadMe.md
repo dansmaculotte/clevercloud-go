@@ -12,14 +12,6 @@ go get github.com/dansmaculotte/clevercloud-go/clevercloud
 
 Generate an `accessToken` and `accessSecret` with [Clever Cloud CLI OAuth](https://console.clever-cloud.com/cli-oauth).
 
-### via CLI
-
-Install Go 1.13+ and run the following command :
-
-```bash
-go run github.com/dansmaculotte/clevercloud-go/cli
-```
-
 ## Usage
 
 To properly request a resource you need a fresh new client instance:
@@ -37,27 +29,4 @@ config = clevercloud.GetConfigFromUser()
 config = clevercloud.GetConfigFromEnv()
 
 client := clevercloud.NewClient(config, &http.Client{})
-```
-
-## Resources
-
-### [Self](./clevercloud/self.go)
-
-- [API Reference](https://www.clever-cloud.com/doc/api/#!/self)
-
-```go
-self, err := clevercloud.GetSelf(client)
-selfAddons, err := self.GetAddons(client)
-selfAddons, err := self.GetAddons(client, selfAddons[0].ID)
-```
-
-### [Organizations](./clevercloud/organization.go)
-
-- [API Reference](https://www.clever-cloud.com/doc/api/#!/organisations)
-
-```go
-organizations, err := clevercloud.GetOrganizations(client, self.ID)
-organization, err := clevercloud.GetOrganization(client, organizations[0].ID)
-organizationAddons, err := organization.GetAddons(client)
-organizationAddon, err := organization.GetAddon(client, organizationAddons[0].ID)
 ```

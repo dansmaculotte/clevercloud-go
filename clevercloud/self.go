@@ -1,13 +1,12 @@
 package clevercloud
 
 import (
-	"fmt"
 	"net/url"
 
 	"github.com/gorilla/schema"
 )
 
-var selfBaseURL = "/self"
+var selfBaseURI = "/self"
 
 // Self Resource
 type Self struct {
@@ -30,38 +29,33 @@ type Self struct {
 	HasPassword    bool     `json:"hasPassword"`
 }
 
-func GetSelf(client *Client) (*Self, error) {
+type SelfAPI struct {
+	client *Client
+	API
+}
+
+func NewSelfAPI(client *Client) *SelfAPI {
+	return &SelfAPI{
+		client: client,
+	}
+}
+
+func (s *SelfAPI) GetSelf() (*Self, error) {
 	self := &Self{}
 
-	if err := client.Get(selfBaseURL, nil, self); err != nil {
+	if err := s.client.Get(selfBaseURI, nil, self); err != nil {
 		return nil, err
 	}
 
 	return self, nil
 }
 
-func (s *Self) GetAddons(client *Client) ([]*Addon, error) {
-	addons := []*Addon{}
-
-	uri := fmt.Sprintf("%s/%s/addons", selfBaseURL, s.ID)
-
-	if err := client.Get(uri, nil, &addons); err != nil {
-		return nil, err
-	}
-
-	return addons, nil
+func (s *SelfAPI) GetAddons(ownerID string) ([]*Addon, error) {
+	return s.getAddons(s.client, selfBaseURI, ownerID)
 }
 
-func (s *Self) GetAddon(client *Client, addonId string) (*Addon, error) {
-	addon := &Addon{}
-
-	uri := fmt.Sprintf("%s/%s/addons/%s", selfBaseURL, s.ID, addonId)
-
-	if err := client.Get(uri, nil, &addon); err != nil {
-		return nil, err
-	}
-
-	return addon, nil
+func (s *SelfAPI) GetAddon(ownerID string, addonID string) (*Addon, error) {
+	return s.getAddon(s.client, selfBaseURI, ownerID, addonID)
 }
 
 type SelfUpdateRequest struct {
@@ -77,7 +71,7 @@ type SelfUpdateRequest struct {
 	ZipCode  string `schema:"zipcode"`
 }
 
-func (s *Self) Update(client *Client, data *SelfUpdateRequest) error {
+func (s *SelfAPI) UpdateSelf(data *SelfUpdateRequest) error {
 	encoder := schema.NewEncoder()
 	form := url.Values{}
 
@@ -85,5 +79,5 @@ func (s *Self) Update(client *Client, data *SelfUpdateRequest) error {
 		return err
 	}
 
-	return client.Put(selfBaseURL, form, nil)
+	return s.client.Put(selfBaseURI, form, nil)
 }
